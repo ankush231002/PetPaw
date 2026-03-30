@@ -1,6 +1,10 @@
 package com.cat.dto;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+
+import com.cat.entity.ScanEventType;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,8 +14,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ScanResponseDTO {
 
+    private String publicUrl;
+    private ScanEventType eventType;
     private Double latitude;
     private Double longitude;
-    private LocalDateTime scanTime;
-
+    private Double accuracy;
+    private Instant scanTime;
 }

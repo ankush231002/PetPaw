@@ -39,6 +39,7 @@ public class SecurityConfig {
             .requestMatchers("/error").permitAll()
             .requestMatchers("/actuator/health").permitAll()
             .requestMatchers(HttpMethod.POST, "/scan/**").permitAll()
+            .requestMatchers("/ws/**").permitAll()
             //  .requestMatchers("/api/auth/**", "/error").permitAll()
             // .requestMatchers("/api/info/create").authenticated() 
             .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()

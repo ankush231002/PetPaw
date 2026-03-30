@@ -3,12 +3,8 @@ package com.cat.Controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.*;
 
 import com.cat.dto.ScanRequestDTO;
 import com.cat.dto.ScanResponseDTO;
@@ -22,15 +18,23 @@ import lombok.RequiredArgsConstructor;
 public class ScanController {
 
     private final ScanService scanService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/{publicUrl}")
-    public ResponseEntity<Void> recordScan(@PathVariable String publicUrl, @RequestBody ScanRequestDTO dto) {
-        scanService.recordScan(publicUrl, dto);
+    public ResponseEntity<Void> createScan(
+            @PathVariable String publicUrl,
+            @RequestBody ScanRequestDTO req
+    ) {
+        ScanResponseDTO saved = scanService.save(publicUrl, req);
+        messagingTemplate.convertAndSend(
+            "/topic/scan/" + publicUrl,
+            saved
+        );
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{publicUrl}")
-    public ResponseEntity<List<ScanResponseDTO>> getRecord(@PathVariable String publicUrl){
+    public ResponseEntity<List<ScanResponseDTO>> getScans(@PathVariable String publicUrl) {
         return ResponseEntity.ok(scanService.getScans(publicUrl));
     }
 }

@@ -3,6 +3,8 @@ package com.cat.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,12 +24,16 @@ public class ScanEvent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double Longitude;
-    private Double Latitude;
+    private Double longitude;
+    private Double latitude;
     private LocalDateTime scanTime;
 
     @ManyToOne
     @JoinColumn(name = "info_id")
     private Info info;
-    
+
+    private Double accuracy;
+
+    @Enumerated(EnumType.STRING)
+    private ScanEventType eventType;
 }
