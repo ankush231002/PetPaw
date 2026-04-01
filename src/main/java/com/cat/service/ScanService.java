@@ -2,9 +2,9 @@ package com.cat.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +24,7 @@ public class ScanService {
     private final ScanRepo scanRepo;
     private final InfoRepo infoRepo;
  
-    public List<ScanResponseDTO> getScans(String publicUrl) {
+    public Page<ScanResponseDTO> getScans(String publicUrl, int page, int size) {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Info info = infoRepo.findByPublicUrl(publicUrl)
@@ -34,18 +34,18 @@ public class ScanService {
             throw new RuntimeException("this is not your pet");
         }
 
-        return scanRepo.findByInfoOrderByScanTimeDesc(info)
-                .stream()
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        return scanRepo.findByInfoOrderByScanTimeDesc(info, pageRequest)
                 .map(event -> new ScanResponseDTO(
-                        event.getId(),
-                        publicUrl,
-                        event.getEventType(),
-                        event.getLatitude(),
-                        event.getLongitude(),
-                        event.getAccuracy(),
-                        event.getScanTime().toInstant(ZoneOffset.UTC)
-                ))
-                .collect(Collectors.toList());
+                    event.getId(),
+                    publicUrl,
+                    event.getEventType(),
+                    event.getLatitude(),
+                    event.getLongitude(),
+                    event.getAccuracy(),
+                    event.getScanTime().toInstant(ZoneOffset.UTC)
+                ));
     }
 
     public ScanResponseDTO save(String publicUrl, ScanRequestDTO dto) {
