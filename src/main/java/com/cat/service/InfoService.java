@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cat.dto.InfoResponseDTO;
+import com.cat.dto.UpdateInfoDTO;
 import com.cat.dto.UserInfo;
 import com.cat.entity.Info;
 import com.cat.entity.User;
@@ -130,5 +131,65 @@ public class InfoService {
         infoRepo.delete(info);
 
         return "deleted";
+    }
+
+    @Transactional
+    public InfoResponseDTO update(String publicUrl, UpdateInfoDTO dto, MultipartFile photo) {
+
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Info info = infoRepo.findByPublicUrl(publicUrl)
+                .orElseThrow(() -> new RuntimeException("pet not found"));
+
+        // ownership check
+        if (!info.getUser().getUserName().equals(userName)) {
+            throw new RuntimeException("this is not your pet");
+        }
+
+        // update text fields only if provided
+        if (dto.getPetName() != null && !dto.getPetName().isBlank()) {
+            info.setPetName(dto.getPetName());
+        }
+        if (dto.getOwnerName() != null && !dto.getOwnerName().isBlank()) {
+            info.setOwnerName(dto.getOwnerName());
+        }
+        if (dto.getPhone() != null && !dto.getPhone().isBlank()) {
+            info.setPhone(dto.getPhone());
+        }
+
+        // update photo only if a new one is provided
+        if (photo != null && !photo.isEmpty()) {
+
+            // delete old photo from Cloudinary first
+            try {
+                cloudinary.uploader().destroy(info.getImagePublicId(), ObjectUtils.emptyMap());
+            } catch (Exception e) {
+                // old photo delete failed, not critical, continue
+            }
+
+            // upload new photo
+            try {
+                Map uploadResult = cloudinary.uploader().upload(
+                    photo.getBytes(),
+                    ObjectUtils.asMap("folder", "pet-tags")
+                );
+                info.setImagePath((String) uploadResult.get("secure_url"));
+                info.setImagePublicId((String) uploadResult.get("public_id"));
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload new photo", e);
+            }
+        }
+
+        // publicUrl is NEVER touched here
+        infoRepo.save(info);
+
+        // return updated state
+        InfoResponseDTO response = new InfoResponseDTO();
+        response.setPetName(info.getPetName());
+        response.setOwnerName(info.getOwnerName());
+        response.setPhone(info.getPhone());
+        response.setImagePath(info.getImagePath());
+        response.setPublicUrl(info.getPublicUrl()); // same as before, unchanged
+        return response;
     }
 }

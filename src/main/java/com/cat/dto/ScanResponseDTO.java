@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ScanResponseDTO {
 
+    private Long id;
     private String publicUrl;
     private ScanEventType eventType;
     private Double latitude;

@@ -12,12 +12,14 @@ import com.cat.service.InfoService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cat.dto.InfoResponseDTO;
+import com.cat.dto.UpdateInfoDTO;
 import com.cat.dto.UserInfo;
 
 import jakarta.validation.Valid;
@@ -62,11 +64,13 @@ public class InfoController {
         return ResponseEntity.ok(infoService.delete(publicUrl));
     }
 
-    // @PostMapping("/{publicUrl}")
-    // public String update(@RequestBody String entity) {
-    //     //TODO: process POST request
-        
-    //     return entity;
-    // }
+    @PutMapping(value = "/{publicUrl}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<InfoResponseDTO> update(
+            @PathVariable String publicUrl,
+            @RequestPart("updateInfoDTO") UpdateInfoDTO dto,
+            @RequestPart(value = "photo", required = false) MultipartFile photo
+    ) {
+        return ResponseEntity.ok(infoService.update(publicUrl, dto, photo));
+    }
     
 }

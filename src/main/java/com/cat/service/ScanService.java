@@ -37,6 +37,7 @@ public class ScanService {
         return scanRepo.findByInfoOrderByScanTimeDesc(info)
                 .stream()
                 .map(event -> new ScanResponseDTO(
+                        event.getId(),
                         publicUrl,
                         event.getEventType(),
                         event.getLatitude(),
@@ -62,6 +63,7 @@ public class ScanService {
         scanRepo.save(scanEvent);
 
         ScanResponseDTO response = new ScanResponseDTO();
+        response.setId(scanEvent.getId());
         response.setPublicUrl(publicUrl);
         response.setEventType(scanEvent.getEventType());
         response.setLatitude(scanEvent.getLatitude());
@@ -70,5 +72,19 @@ public class ScanService {
         response.setScanTime(scanEvent.getScanTime().toInstant(ZoneOffset.UTC));
 
         return response;
+    }
+
+    public String delete(Long id){
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        ScanEvent scanEvent = scanRepo.findById(id)
+                            .orElseThrow(()-> new RuntimeException("scan not found"));
+
+        if(!scanEvent.getInfo().getUser().getUserName().equals(userName)){
+            throw new RuntimeException("this is not your pet");
+        }
+
+        scanRepo.deleteById(id);
+        return "deleted successfully";
     }
 }

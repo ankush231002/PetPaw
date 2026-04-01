@@ -37,4 +37,9 @@ public class ScanController {
     public ResponseEntity<List<ScanResponseDTO>> getScans(@PathVariable String publicUrl) {
         return ResponseEntity.ok(scanService.getScans(publicUrl));
     }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteById(Long id){
+        return ResponseEntity.ok(scanService.delete(id));
+    }
 }

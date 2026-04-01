@@ -35,3 +35,6 @@ build/
 
 *.jar
 .env
+
+
+application-local.properties
